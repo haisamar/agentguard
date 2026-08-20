@@ -195,6 +195,48 @@ The request fails at the least-privilege authorization boundary.
 
 # Architecture
 
+# Architecture
+
+AgentGuard separates machine authentication, least-privilege authorization, contextual risk decisions, and human approval so an authenticated AI agent never automatically receives unlimited authority.
+
+```mermaid
+flowchart LR
+    AGENT["AI Agent<br/>Sales / Finance"]
+    AUTH0M["Auth0<br/>Machine Identity"]
+    TOKEN["OAuth Access Token<br/>Scoped Permissions"]
+    MCP["AgentGuard MCP<br/>Protected Tools"]
+    SCOPE{"Scope<br/>Authorized?"}
+    POLICY{"Contextual<br/>Policy"}
+    APPROVAL["Approval Request<br/>Persisted"]
+    AUTH0H["Auth0<br/>Human Identity"]
+    HUMAN{"Human<br/>Decision"}
+    EXEC["Controlled<br/>Execution"]
+    BLOCK["Execution<br/>Blocked"]
+    DB[("Supabase<br/>Approvals + Audit")]
+
+    AGENT --> AUTH0M
+    AUTH0M --> TOKEN
+    TOKEN --> MCP
+    MCP --> SCOPE
+
+    SCOPE -->|"Missing scope"| BLOCK
+    SCOPE -->|"Authorized"| POLICY
+
+    POLICY -->|"Low risk"| EXEC
+    POLICY -->|"Forbidden"| BLOCK
+    POLICY -->|"Sensitive"| APPROVAL
+
+    APPROVAL --> DB
+    APPROVAL --> AUTH0H
+    AUTH0H --> HUMAN
+
+    HUMAN -->|"Approve"| EXEC
+    HUMAN -->|"Deny"| BLOCK
+
+    EXEC --> DB
+    BLOCK --> DB
+```
+
 ```mermaid
 flowchart LR
 
