@@ -195,8 +195,6 @@ The request fails at the least-privilege authorization boundary.
 
 # Architecture
 
-# Architecture
-
 AgentGuard separates machine authentication, least-privilege authorization, contextual risk decisions, and human approval so an authenticated AI agent never automatically receives unlimited authority.
 
 ```mermaid
@@ -235,48 +233,6 @@ flowchart LR
 
     EXEC --> DB
     BLOCK --> DB
-```
-
-```mermaid
-flowchart LR
-
-    A[AI Agent] --> B[Auth0 Machine Identity]
-
-    B --> C[OAuth Access Token]
-
-    C --> D[Protected MCP Server]
-
-    D --> E{Required Scope Present?}
-
-    E -->|No| F[DENY]
-    E -->|Yes| G[Contextual Policy]
-
-    G -->|Low Risk| H[ALLOW]
-
-    G -->|Sensitive| I[APPROVAL_REQUIRED]
-
-    G -->|Forbidden| F
-
-    I --> J[(Supabase Approval Record)]
-
-    J --> K[Auth0 Human Authentication]
-
-    K --> L{Human Decision}
-
-    L -->|Approve| M[APPROVED]
-    L -->|Deny| N[DENIED]
-
-    M --> O[Agent Executes Approved Action]
-
-    O --> P[Identity + Approval Verification]
-
-    P --> Q[EXECUTED]
-
-    F --> R[(Audit Trail)]
-    H --> R
-    I --> R
-    N --> R
-    Q --> R
 ```
 
 ---
