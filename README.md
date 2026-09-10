@@ -1,5 +1,7 @@
 # AgentGuard
 
+[![M8ven Live Monitored](https://m8ven.ai/badge/mcp/haisamar-agentguard-1w8g7f)](https://m8ven.ai/mcp/haisamar-agentguard-1w8g7f)
+
 ### Identity Security for AI Agents
 
 AgentGuard is an identity-aware authorization layer for autonomous AI agents.
