@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { identityName } from "@/lib/agent-identities";
+
 export type TraceApproval = {
   id: string;
   requesting_identity: string;
@@ -51,27 +53,6 @@ type TraceStep = {
   tone: Tone;
 };
 
-function identityName(identity: string | null) {
-  if (!identity) return "Unknown";
-
-  if (identity.startsWith("acWr66")) {
-    return "Sales Agent";
-  }
-
-  if (identity.startsWith("46Pv6Y")) {
-    return "Finance Agent";
-  }
-
-  if (identity.startsWith("URssw3")) {
-    return "Admin Runtime";
-  }
-
-  if (identity.startsWith("human:")) {
-    return "Human Administrator";
-  }
-
-  return "Unknown Identity";
-}
 
 function formatAction(action: string) {
   return action
@@ -132,6 +113,9 @@ export function TraceExplorer({
   const scenario = useMemo(() => {
     if (selected === "approved" && approvedApproval) {
       const amount = approvedApproval.payload?.amount;
+      const approvedReviewer =
+        approvedApproval.reviewed_by ||
+        approvedApproval.approved_by;
 
       const steps: TraceStep[] = [
         {
@@ -162,8 +146,8 @@ export function TraceExplorer({
           number: "04",
           label: "Human Review",
           title: "Approved",
-          description: approvedApproval.reviewed_by
-            ? `Reviewed by ${identityName(approvedApproval.reviewed_by)}`
+          description: approvedReviewer
+            ? `Reviewed by ${identityName(approvedReviewer)}`
             : "Human approval verified",
           tone: "blue",
         },
@@ -194,6 +178,9 @@ export function TraceExplorer({
 
     if (selected === "denied" && deniedApproval) {
       const amount = deniedApproval.payload?.amount;
+      const deniedReviewer =
+        deniedApproval.reviewed_by ||
+        deniedApproval.approved_by;
 
       const steps: TraceStep[] = [
         {
@@ -224,8 +211,8 @@ export function TraceExplorer({
           number: "04",
           label: "Human Review",
           title: "Denied",
-          description: deniedApproval.reviewed_by
-            ? `Reviewed by ${identityName(deniedApproval.reviewed_by)}`
+          description: deniedReviewer
+            ? `Reviewed by ${identityName(deniedReviewer)}`
             : "Human administrator denied request",
           tone: "danger",
         },
@@ -408,7 +395,7 @@ export function TraceExplorer({
               Trace Reference
             </p>
 
-            <p className="mt-1 max-w-[290px] truncate font-mono text-xs text-zinc-500">
+            <p className="mt-1 max-w-[290px] break-all font-mono text-xs leading-5 text-zinc-500">
               {scenario.reference}
             </p>
           </div>
@@ -417,24 +404,18 @@ export function TraceExplorer({
         {/* FLOW */}
 
         <div className="p-6">
-          <div className="grid gap-3 xl:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr_auto_1fr]">
-            {scenario.steps.map((step, index) => (
-              <div
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            {scenario.steps.map((step) => (
+              <TraceStepCard
                 key={step.number}
-                className="contents"
-              >
-                <TraceStepCard {...step} />
-
-                {index < scenario.steps.length - 1 && (
-                  <FlowArrow />
-                )}
-              </div>
+                {...step}
+              />
             ))}
           </div>
 
           {/* CONTEXT */}
 
-          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-white/[0.06] pt-5">
+          <div className="mt-6 flex flex-wrap items-center gap-2.5 border-t border-white/[0.06] pt-5">
             <ContextValue
               label="Action"
               value={scenario.action}
@@ -594,19 +575,6 @@ function TraceStepCard({
       <p className="mt-2 text-xs leading-5 text-zinc-600">
         {description}
       </p>
-    </div>
-  );
-}
-
-function FlowArrow() {
-  return (
-    <div className="hidden items-center justify-center xl:flex">
-      <div className="flex items-center">
-        <div className="h-px w-5 bg-white/10" />
-        <span className="text-sm text-zinc-700">
-          ›
-        </span>
-      </div>
     </div>
   );
 }

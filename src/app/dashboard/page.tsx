@@ -5,6 +5,10 @@ import {
 } from "@/lib/agentguard-data";
 
 import { auth0 } from "@/lib/auth0";
+import {
+  identityName,
+  identityType,
+} from "@/lib/agent-identities";
 import { ApprovalButtons } from "./ApprovalButtons";
 import {
   SecurityActivity,
@@ -60,53 +64,6 @@ const AGENTS = [
   },
 ];
 
-function identityName(identity: string | null) {
-  if (!identity) {
-    return "—";
-  }
-
-  if (identity.startsWith("acWr66")) {
-    return "Sales Agent";
-  }
-
-  if (identity.startsWith("46Pv6Y")) {
-    return "Finance Agent";
-  }
-
-  if (identity.startsWith("URssw3")) {
-    return "Admin Runtime";
-  }
-
-  if (identity.startsWith("human:")) {
-    return "Human Administrator";
-  }
-
-  if (identity === "system:test") {
-    return "AgentGuard System";
-  }
-
-  return "Unknown Identity";
-}
-
-function identityType(identity: string | null) {
-  if (!identity) {
-    return "Unknown";
-  }
-
-  if (identity.startsWith("human:")) {
-    return "Human";
-  }
-
-  if (identity.endsWith("@clients")) {
-    return "Machine";
-  }
-
-  if (identity === "system:test") {
-    return "System";
-  }
-
-  return "Unknown";
-}
 
 function formatAction(action: string) {
   return action
@@ -162,6 +119,27 @@ function identityTypeStyles(type: string) {
   }
 }
 
+function approvalReviewer(
+  approval: ApprovalRow
+) {
+  return (
+    approval.reviewed_by ||
+    approval.approved_by ||
+    null
+  );
+}
+
+
+function approvalReviewTime(
+  approval: ApprovalRow
+) {
+  return (
+    approval.reviewed_at ||
+    approval.approved_at ||
+    null
+  );
+}
+
 export default async function DashboardPage() {
   const session = await auth0.getSession();
   const humanAdmin = session?.user;
@@ -184,14 +162,23 @@ export default async function DashboardPage() {
     approvals.find(
       (approval) =>
         approval.status === "EXECUTED" &&
-        approval.reviewed_by?.startsWith("human:")
+        identityType(
+          approvalReviewer(
+            approval
+          )
+        ) === "Human"
     ) ?? null;
+
 
   const humanDeniedApproval =
     approvals.find(
       (approval) =>
         approval.status === "DENIED" &&
-        approval.reviewed_by?.startsWith("human:")
+        identityType(
+          approvalReviewer(
+            approval
+          )
+        ) === "Human"
     ) ?? null;
 
   const scopeBlockedEvent =
@@ -204,10 +191,10 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#08090b] text-white">
-      <div className="mx-auto max-w-[1500px] px-8 py-8">
+      <div className="mx-auto max-w-[1500px] px-5 py-6 sm:px-6 lg:px-8 lg:py-8">
         {/* HEADER */}
 
-        <header className="flex items-center justify-between border-b border-white/10 pb-7">
+        <header className="flex flex-wrap items-center justify-between gap-5 border-b border-white/10 pb-7">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 font-bold text-blue-400">
               AG
@@ -224,8 +211,8 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="text-right">
+          <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
+            <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-zinc-200">
                 {humanAdmin?.name ||
                   humanAdmin?.email ||
@@ -292,7 +279,7 @@ export default async function DashboardPage() {
           <MetricCard
             label="Blocked Actions"
             value={deniedEvents.length}
-            description="Denied by policy"
+            description="Prevented before execution"
           />
         </section>
 
@@ -396,7 +383,7 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <div className="max-w-xl rounded-2xl border border-blue-500/15 bg-blue-500/[0.025] p-5">
+          <div className="max-w-3xl rounded-2xl border border-blue-500/15 bg-blue-500/[0.025] p-5">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 font-semibold text-blue-400">
@@ -460,14 +447,21 @@ export default async function DashboardPage() {
 
         {/* PENDING + SECURITY ACTIVITY */}
 
-        <section className="mt-12 grid gap-6 xl:grid-cols-[0.9fr_1.4fr]">
+        <section className="mt-12 grid items-start gap-6 xl:grid-cols-[0.9fr_1.4fr]">
           {/* PENDING APPROVALS */}
 
           <div>
             <div className="mb-5">
-              <h3 className="text-lg font-semibold">
-                Pending Approvals
-              </h3>
+              <div className="flex flex-wrap items-center gap-3">
+                <h3 className="text-lg font-semibold">
+                  Pending Approvals
+                </h3>
+
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/20 bg-amber-500/[0.07] px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-amber-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  Live Review Queue
+                </span>
+              </div>
 
               <p className="mt-1 text-sm text-zinc-500">
                 Sensitive actions requiring human review.
@@ -633,13 +627,13 @@ export default async function DashboardPage() {
                         key={approval.id}
                         className="border-b border-white/[0.05] transition last:border-b-0 hover:bg-white/[0.02]"
                       >
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3.5">
                           <span className="font-mono text-xs text-zinc-500">
                             {approval.id}
                           </span>
                         </td>
 
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3.5">
                           <div>
                             <p className="text-sm text-zinc-300">
                               {identityName(
@@ -653,7 +647,7 @@ export default async function DashboardPage() {
                           </div>
                         </td>
 
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3.5">
                           <p className="text-sm text-zinc-300">
                             {formatAction(approval.action)}
                           </p>
@@ -665,7 +659,7 @@ export default async function DashboardPage() {
                           )}
                         </td>
 
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3.5">
                           <span className="text-sm font-medium text-zinc-300">
                             {approval.payload?.amount !== undefined
                               ? `$${approval.payload.amount}`
@@ -673,7 +667,7 @@ export default async function DashboardPage() {
                           </span>
                         </td>
 
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-3.5">
                           <span
                             className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-semibold ${statusStyles(
                               approval.status
@@ -683,33 +677,33 @@ export default async function DashboardPage() {
                           </span>
                         </td>
 
-                        <td className="px-5 py-4">
-                          {approval.reviewed_by ? (
+                        <td className="px-5 py-3.5">
+                          {approvalReviewer(approval) ? (
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <p className="text-sm text-zinc-400">
                                   {identityName(
-                                    approval.reviewed_by
+                                    approvalReviewer(approval)
                                   )}
                                 </p>
 
                                 <span
                                   className={`rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide ${identityTypeStyles(
                                     identityType(
-                                      approval.reviewed_by
+                                      approvalReviewer(approval)
                                     )
                                   )}`}
                                 >
                                   {identityType(
-                                    approval.reviewed_by
+                                    approvalReviewer(approval)
                                   )}
                                 </span>
                               </div>
 
-                              {approval.reviewed_at && (
+                              {approvalReviewTime(approval) && (
                                 <p className="mt-1 text-[11px] text-zinc-600">
                                   {formatTime(
-                                    approval.reviewed_at
+                                    approvalReviewTime(approval)
                                   )}
                                 </p>
                               )}

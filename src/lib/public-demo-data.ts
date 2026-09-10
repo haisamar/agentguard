@@ -1,10 +1,3 @@
-import "server-only";
-
-import {
-  getApprovals,
-  getAuditEvents,
-} from "@/lib/agentguard-data";
-
 export type PublicTraceStep = {
   number: string;
   label: string;
@@ -19,12 +12,21 @@ export type PublicTraceStep = {
     | "neutral";
 };
 
+
 export type PublicDemoCase = {
-  key: "approved" | "denied" | "scope";
+  key:
+    | "authorized"
+    | "denied"
+    | "approval";
+
   tabLabel: string;
+
   title: string;
+
   subtitle: string;
+
   status: string;
+
   statusTone:
     | "success"
     | "warning"
@@ -34,300 +36,312 @@ export type PublicDemoCase = {
     | "neutral";
 
   action: string;
+
   amount?: number;
+
   resource?: string;
 
   steps: PublicTraceStep[];
 };
 
-type ApprovalRow = {
-  id: string;
-  requesting_identity: string;
-  action: string;
-  payload: {
-    amount?: number;
-    account_id?: string;
-    reason?: string;
-  };
-  reason: string | null;
-  status: string;
-  reviewed_by: string | null;
-  reviewed_at: string | null;
-  approved_by: string | null;
-  approved_at: string | null;
-  created_at: string;
-  executed_at: string | null;
-};
 
-type AuditEventRow = {
-  id: string;
-  identity: string;
-  action: string;
-  decision: string;
-  required_scope: string | null;
-  reason: string | null;
-  approval_id: string | null;
-  metadata: Record<string, unknown>;
-  created_at: string;
-};
-
-function identityName(identity: string | null) {
-  if (!identity) return "Unknown";
-
-  if (identity.startsWith("acWr66")) {
-    return "Sales Agent";
-  }
-
-  if (identity.startsWith("46Pv6Y")) {
-    return "Finance Agent";
-  }
-
-  if (identity.startsWith("URssw3")) {
-    return "Admin Runtime";
-  }
-
-  if (identity.startsWith("human:")) {
-    return "Human Administrator";
-  }
-
-  return "Protected Identity";
-}
-
-function actionName(action: string) {
-  return action
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function requiredScope(action: string) {
-  switch (action) {
-    case "issue_refund":
-      return "finance:refund";
-
-    case "search_accounts":
-      return "crm:read";
-
-    case "export_customer_data":
-      return "customer:export";
-
-    default:
-      return "authorized scope";
-  }
-}
 
 export async function getPublicDemoCases(): Promise<
   PublicDemoCase[]
 > {
-  const [approvals, auditEvents] = (await Promise.all([
-    getApprovals(),
-    getAuditEvents(),
-  ])) as [ApprovalRow[], AuditEventRow[]];
 
-  const cases: PublicDemoCase[] = [];
+  return [
+    {
+      key: "authorized",
 
-  const approved =
-    approvals.find(
-      (approval) =>
-        approval.status === "EXECUTED" &&
-        approval.reviewed_by?.startsWith("human:")
-    ) ?? null;
+      tabLabel: "Authorized Agent",
 
-  const denied =
-    approvals.find(
-      (approval) =>
-        approval.status === "DENIED" &&
-        approval.reviewed_by?.startsWith("human:")
-    ) ?? null;
+      title: "Authorized Agent",
 
-  const scopeBlocked =
-    auditEvents.find(
-      (event) =>
-        event.decision === "DENY" &&
-        event.metadata?.security_event ===
-          "authorization_failure"
-    ) ?? null;
-
-  if (approved) {
-    const amount = approved.payload?.amount;
-
-    cases.push({
-      key: "approved",
-      tabLabel: "Human Approved",
-      title: "Human Approved",
       subtitle:
-        "A sensitive agent action passed least-privilege authorization, triggered policy escalation, and was approved by an authenticated human before execution.",
-      status: "EXECUTED",
+        "A finance agent with the correct machine identity and permissions completed a low-risk action without requiring human intervention.",
+
+      status: "ALLOWED",
+
       statusTone: "success",
 
-      action: actionName(approved.action),
-      amount,
-      resource: approved.payload?.account_id,
+      action: "Issue Refund",
+
+      amount: 100,
+
+      resource: "acct_demo_001",
+
 
       steps: [
+
         {
           number: "01",
+
           label: "Agent Identity",
-          title: identityName(approved.requesting_identity),
-          description: "Authenticated machine identity",
+
+          title: "Finance Agent",
+
+          description:
+            "Authenticated machine identity verified.",
+
           tone: "violet",
         },
+
+
         {
           number: "02",
+
           label: "Scope Check",
-          title: requiredScope(approved.action),
-          description: "OAuth permission verified",
+
+          title: "finance:refund",
+
+          description:
+            "OAuth permission verified.",
+
           tone: "success",
         },
+
+
         {
           number: "03",
+
           label: "Contextual Policy",
-          title: "Approval Required",
+
+          title: "Low Risk Action",
+
           description:
-            amount !== undefined
-              ? `Refund $${amount} exceeds the $500 autonomous limit`
-              : "Sensitive action requires human approval",
-          tone: "warning",
-        },
-        {
-          number: "04",
-          label: "Human Review",
-          title: "Approved",
-          description: "Authenticated administrator approved the action",
+            "Refund amount is within autonomous execution limits.",
+
           tone: "blue",
         },
+
+
+        {
+          number: "04",
+
+          label: "Decision",
+
+          title: "Allowed",
+
+          description:
+            "AgentGuard permitted the action.",
+
+          tone: "success",
+        },
+
+
         {
           number: "05",
-          label: "Execution",
-          title: "Action Executed",
-          description: "Approved action executed once",
-          tone: "success",
+
+          label: "Audit",
+
+          title: "Recorded",
+
+          description:
+            "Security decision stored in the audit trail.",
+
+          tone: "blue",
         },
+
       ],
-    });
-  }
+    },
 
-  if (denied) {
-    const amount = denied.payload?.amount;
 
-    cases.push({
+
+    {
       key: "denied",
-      tabLabel: "Human Denied",
-      title: "Human Denied",
+
+      tabLabel: "Blocked Agent",
+
+      title: "Blocked Agent",
+
       subtitle:
-        "The agent was authorized to request the action, but human review denied it and execution remained blocked.",
+        "A sales agent attempted a financial action without the required permission and was blocked before execution.",
+
+
       status: "DENIED",
+
       statusTone: "danger",
 
-      action: actionName(denied.action),
-      amount,
-      resource: denied.payload?.account_id,
+      action: "Issue Refund",
+
+      amount: 750,
+
+      resource: "acct_demo_001",
+
 
       steps: [
+
         {
           number: "01",
+
           label: "Agent Identity",
-          title: identityName(denied.requesting_identity),
-          description: "Authenticated machine identity",
+
+          title: "Sales Agent",
+
+          description:
+            "Authenticated machine identity verified.",
+
           tone: "violet",
         },
+
+
         {
           number: "02",
+
           label: "Scope Check",
-          title: requiredScope(denied.action),
-          description: "OAuth permission verified",
-          tone: "success",
+
+          title: "Missing finance:refund",
+
+          description:
+            "Agent does not possess the required financial permission.",
+
+          tone: "danger",
         },
+
+
         {
           number: "03",
+
           label: "Contextual Policy",
-          title: "Approval Required",
+
+          title: "Not Evaluated",
+
           description:
-            amount !== undefined
-              ? `Refund $${amount} exceeds the $500 autonomous limit`
-              : "Sensitive action requires human approval",
+            "Authorization failed before policy execution.",
+
+          tone: "neutral",
+        },
+
+
+        {
+          number: "04",
+
+          label: "Human Review",
+
+          title: "Not Required",
+
+          description:
+            "Request never reached approval workflow.",
+
+          tone: "neutral",
+        },
+
+
+        {
+          number: "05",
+
+          label: "Audit",
+
+          title: "Security Event Recorded",
+
+          description:
+            "Denied action preserved for investigation.",
+
+          tone: "danger",
+        },
+
+      ],
+    },
+
+
+
+    {
+      key: "approval",
+
+      tabLabel: "Approval Workflow",
+
+      title: "Approval Workflow",
+
+      subtitle:
+        "A finance agent had permission to request the action, but policy required authenticated human approval before execution.",
+
+
+      status: "APPROVAL REQUIRED",
+
+      statusTone: "warning",
+
+
+      action: "Issue Refund",
+
+      amount: 750,
+
+      resource: "acct_demo_001",
+
+
+      steps: [
+
+        {
+          number: "01",
+
+          label: "Agent Identity",
+
+          title: "Finance Agent",
+
+          description:
+            "Authenticated machine identity verified.",
+
+          tone: "violet",
+        },
+
+
+        {
+          number: "02",
+
+          label: "Scope Check",
+
+          title: "finance:refund",
+
+          description:
+            "OAuth permission verified.",
+
+          tone: "success",
+        },
+
+
+        {
+          number: "03",
+
+          label: "Contextual Policy",
+
+          title: "High Risk Action",
+
+          description:
+            "Refund exceeds autonomous execution threshold.",
+
           tone: "warning",
         },
+
+
         {
           number: "04",
-          label: "Human Review",
-          title: "Denied",
-          description: "Authenticated administrator denied the request",
-          tone: "danger",
+
+          label: "Human Approval",
+
+          title: "Waiting for Review",
+
+          description:
+            "Authorized administrator approval required.",
+
+          tone: "warning",
         },
+
+
         {
           number: "05",
-          label: "Execution",
-          title: "Execution Blocked",
-          description: "Denied action cannot be executed",
-          tone: "danger",
+
+          label: "Audit",
+
+          title: "Approval Trace Created",
+
+          description:
+            "Identity, decision, and review history linked.",
+
+          tone: "blue",
         },
+
       ],
-    });
-  }
+    },
 
-  if (scopeBlocked) {
-    const grantedScopes = Array.isArray(
-      scopeBlocked.metadata?.granted_scopes
-    )
-      ? scopeBlocked.metadata.granted_scopes.join(", ")
-      : "Restricted permissions";
-
-    const missingScopes = Array.isArray(
-      scopeBlocked.metadata?.missing_scopes
-    )
-      ? scopeBlocked.metadata.missing_scopes.join(", ")
-      : scopeBlocked.required_scope || "Required permission";
-
-    cases.push({
-      key: "scope",
-      tabLabel: "Scope Blocked",
-      title: "Scope Blocked",
-      subtitle:
-        "Least-privilege authorization stopped the agent before contextual policy or human review was reached.",
-      status: "DENY",
-      statusTone: "danger",
-
-      action: actionName(scopeBlocked.action),
-
-      steps: [
-        {
-          number: "01",
-          label: "Agent Identity",
-          title: identityName(scopeBlocked.identity),
-          description: "Authenticated machine identity",
-          tone: "violet",
-        },
-        {
-          number: "02",
-          label: "Scope Check",
-          title: `Missing ${missingScopes}`,
-          description: `Granted: ${grantedScopes}`,
-          tone: "danger",
-        },
-        {
-          number: "03",
-          label: "Contextual Policy",
-          title: "Not Evaluated",
-          description: "Authorization failed before policy execution",
-          tone: "neutral",
-        },
-        {
-          number: "04",
-          label: "Human Review",
-          title: "Not Required",
-          description: "Request never reached human escalation",
-          tone: "neutral",
-        },
-        {
-          number: "05",
-          label: "Execution",
-          title: "Execution Blocked",
-          description: "Least-privilege authorization prevented the action",
-          tone: "danger",
-        },
-      ],
-    });
-  }
-
-  return cases;
+  ];
 }

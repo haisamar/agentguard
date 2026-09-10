@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  identityName,
+  identityType,
+} from "@/lib/agent-identities";
+
 export type SecurityAuditEvent = {
   id: string;
   identity: string;
@@ -14,49 +19,6 @@ export type SecurityAuditEvent = {
   created_at: string;
 };
 
-function identityName(identity: string | null) {
-  if (!identity) return "Unknown";
-
-  if (identity.startsWith("acWr66")) {
-    return "Sales Agent";
-  }
-
-  if (identity.startsWith("46Pv6Y")) {
-    return "Finance Agent";
-  }
-
-  if (identity.startsWith("URssw3")) {
-    return "Admin Runtime";
-  }
-
-  if (identity.startsWith("human:")) {
-    return "Human Administrator";
-  }
-
-  if (identity === "system:test") {
-    return "AgentGuard System";
-  }
-
-  return "Unknown Identity";
-}
-
-function identityType(identity: string | null) {
-  if (!identity) return "Unknown";
-
-  if (identity.startsWith("human:")) {
-    return "Human";
-  }
-
-  if (identity.endsWith("@clients")) {
-    return "Machine";
-  }
-
-  if (identity === "system:test") {
-    return "System";
-  }
-
-  return "Unknown";
-}
 
 function formatAction(action: string) {
   return action
@@ -184,8 +146,9 @@ export function SecurityActivity({
                 Security Activity
               </h3>
 
-              <span className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                Audit Log
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/20 bg-emerald-500/[0.06] px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Persisted Audit
               </span>
             </div>
 
@@ -200,7 +163,7 @@ export function SecurityActivity({
           </span>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+        <div className="max-h-[560px] overflow-y-auto rounded-2xl border border-white/10 bg-white/[0.02]">
           {events.length === 0 ? (
             <div className="p-10 text-center">
               <p className="text-sm text-zinc-400">
@@ -220,7 +183,7 @@ export function SecurityActivity({
                   key={event.id}
                   type="button"
                   onClick={() => setSelectedEvent(event)}
-                  className={`group flex w-full gap-4 p-5 text-left transition hover:bg-white/[0.035] ${
+                  className={`group flex w-full gap-4 p-4 text-left transition hover:bg-white/[0.035] ${
                     index !== events.length - 1
                       ? "border-b border-white/[0.06]"
                       : ""
@@ -285,7 +248,7 @@ export function SecurityActivity({
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
+                  <div className="flex shrink-0 items-start gap-3">
                     <span className="whitespace-nowrap text-xs text-zinc-600">
                       {formatTime(event.created_at)}
                     </span>
