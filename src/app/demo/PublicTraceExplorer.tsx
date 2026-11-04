@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
+
 
 import type {
   PublicDemoCase,
@@ -30,35 +27,7 @@ export function PublicTraceExplorer({
 }) {
 
 
-  const {
-    selectedTrace,
-  } = useDemo();
-
-
-
-  const [
-    selectedKey,
-    setSelectedKey,
-  ] = useState<
-    PublicDemoCase["key"]
-  >(
-    selectedTrace
-  );
-
-
-
-  useEffect(() => {
-
-    setSelectedKey(
-      selectedTrace
-    );
-
-  }, [
-    selectedTrace,
-  ]);
-
-
-
+  const { selectedTrace: selectedKey, setSelectedTrace: setSelectedKey } = useDemo();
 
   const selected =
     cases.find(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+
 
 import type {
   SimulationScenario,
@@ -29,72 +29,14 @@ export function SecurityEventStream({
   stepIndex: number;
 }) {
 
-  const [events, setEvents] = useState<StreamEvent[]>([]);
-
-
-
-  useEffect(() => {
-
-    /*
-      Reset stream whenever a new scenario starts.
-    */
-
-    setEvents([]);
-
-
-  }, [
-    scenario.id,
-  ]);
-
-
-
-
-
-  useEffect(() => {
-
-    const visibleSteps =
-      scenario.steps.slice(
-        0,
-        stepIndex + 1
-      );
-
-
-    const generatedEvents =
-      visibleSteps.map(
-        (step,index) => ({
-          id:
-            `${scenario.id}-${step.id}-${index}`,
-
-          title:
-            step.title,
-
-          description:
-            `${scenario.agent}: ${step.description}`,
-
-          tone:
-            step.tone === "violet"
-              ? "blue"
-              : step.tone,
-        })
-      );
-
-
-
-    setEvents(generatedEvents);
-
-
-
-  }, [
-    scenario.id,
-    scenario.steps,
-    scenario.agent,
-    stepIndex,
-  ]);
-
-
-
-
-
+  const events: StreamEvent[] = scenario.steps.slice(0, stepIndex + 1).map(
+    (step, index) => ({
+      id: `${scenario.id}-${step.id}-${index}`,
+      title: step.title,
+      description: `${scenario.agent}: ${step.description}`,
+      tone: step.tone === "violet" ? "blue" : step.tone,
+    })
+  );
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
