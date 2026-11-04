@@ -1,0 +1,23 @@
+name: Frontend checks
+on: [push, pull_request]
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_SECRET_KEY: ci-placeholder-not-a-secret
+      AUTH0_DOMAIN: example.auth0.com
+      AUTH0_CLIENT_ID: ci-placeholder
+      AUTH0_CLIENT_SECRET: ci-placeholder
+      AUTH0_SECRET: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+      APP_BASE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
