@@ -78,7 +78,7 @@ export async function approveApproval(formData: FormData) {
   const response = await fetch(
     `${supabaseUrl}/rest/v1/approvals?id=eq.${encodeURIComponent(
       approvalId
-    )}&status=eq.PENDING`,
+    )}&status=eq.PENDING&created_at=gt.${encodeURIComponent(new Date(Date.now() - 60 * 60 * 1000).toISOString())}`,
     {
       method: "PATCH",
       headers: {
@@ -109,7 +109,7 @@ export async function approveApproval(formData: FormData) {
 
   if (!Array.isArray(updated) || updated.length === 0) {
     throw new Error(
-      "Approval is no longer pending or does not exist"
+      "Approval has expired, is no longer pending, or does not exist"
     );
   }
 

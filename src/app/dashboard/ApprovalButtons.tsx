@@ -9,7 +9,9 @@ export function ApprovalButtons({
   approvalId: string;
 }) {
   return (
-    <div className="mt-5 grid grid-cols-2 gap-3">
+    <div>
+      <p className="mt-4 text-xs text-zinc-500">Approval is valid for one hour from the request time. Expired requests must be submitted again.</p>
+      <div className="mt-5 grid grid-cols-2 gap-3">
       <form action={denyApproval}>
         <input
           type="hidden"
@@ -39,6 +41,7 @@ export function ApprovalButtons({
           Approve
         </button>
       </form>
+      </div>
     </div>
   );
 }
