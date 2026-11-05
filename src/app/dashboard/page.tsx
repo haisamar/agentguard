@@ -2,6 +2,8 @@ import {
   getApprovals,
   getAuditEvents,
   getPendingApprovals,
+  getRefundReceipts,
+  type RefundReceipt,
 } from "@/lib/agentguard-data";
 
 import { auth0 } from "@/lib/auth0";
@@ -73,7 +75,7 @@ function formatAction(action: string) {
 
 function formatTime(value: string | null) {
   if (!value) {
-    return "—";
+    return "â€”";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -144,14 +146,16 @@ export default async function DashboardPage() {
   const session = await auth0.getSession();
   const humanAdmin = session?.user;
 
-  const [approvals, auditEvents, pendingApprovals] = (await Promise.all([
+  const [approvals, auditEvents, pendingApprovals, receipts] = (await Promise.all([
     getApprovals(),
     getAuditEvents(),
     getPendingApprovals(),
+    getRefundReceipts(),
   ])) as [
     ApprovalRow[],
     SecurityAuditEvent[],
     ApprovalRow[],
+    RefundReceipt[],
   ];
 
   const deniedEvents = auditEvents.filter(
@@ -472,7 +476,7 @@ export default async function DashboardPage() {
               {pendingApprovals.length === 0 ? (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center">
                   <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
-                    ✓
+                    âœ“
                   </div>
 
                   <p className="mt-4 text-sm text-zinc-300">
@@ -663,7 +667,7 @@ export default async function DashboardPage() {
                           <span className="text-sm font-medium text-zinc-300">
                             {approval.payload?.amount !== undefined
                               ? `$${approval.payload.amount}`
-                              : "—"}
+                              : "â€”"}
                           </span>
                         </td>
 
@@ -710,7 +714,7 @@ export default async function DashboardPage() {
                             </div>
                           ) : (
                             <span className="text-sm text-zinc-600">
-                              —
+                              â€”
                             </span>
                           )}
                         </td>
@@ -731,11 +735,35 @@ export default async function DashboardPage() {
           </div>
         </section>
 
+        <section className="mt-12" aria-labelledby="receipt-heading">
+          <h3 id="receipt-heading" className="text-lg font-semibold">Sandbox refund receipts</h3>
+          <p className="mt-2 text-sm text-zinc-400">Persisted ledger entries for simulated refunds. No real money is transferred. Each approval can create one receipt.</p>
+          <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10">
+            <table className="w-full min-w-[850px] text-left text-sm">
+              <caption className="sr-only">Latest 50 sandbox refund receipts</caption>
+              <thead className="bg-white/5 text-zinc-400">
+                <tr>{["Receipt / approval", "Account", "Amount", "Execution identity", "Recorded"].map(label => <th key={label} scope="col" className="px-5 py-4 font-medium">{label}</th>)}</tr>
+              </thead>
+              <tbody>
+                {receipts.length === 0 ? <tr><td colSpan={5} className="px-5 py-8 text-zinc-500">No sandbox receipts recorded yet.</td></tr> : receipts.map(receipt => (
+                  <tr key={receipt.id} className="border-t border-white/5">
+                    <td className="px-5 py-4"><p className="font-mono text-xs">{receipt.id}</p><p className="mt-1 font-mono text-xs text-zinc-500">{receipt.approval_id}</p><p className="mt-1 text-xs text-blue-400">{receipt.simulated ? "SIMULATED" : "Review receipt type"}</p></td>
+                    <td className="px-5 py-4 font-mono text-xs">{receipt.account_id}</td>
+                    <td className="px-5 py-4">{new Intl.NumberFormat("en-US", { style: "currency", currency: receipt.currency }).format(receipt.amount_minor / 100)} {receipt.currency}</td>
+                    <td className="px-5 py-4 text-zinc-400">{identityName(receipt.identity)}</td>
+                    <td className="px-5 py-4 text-zinc-400">{formatTime(receipt.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         {/* FOOTER */}
 
         <footer className="mt-14 border-t border-white/10 py-6 text-xs text-zinc-700">
-          AgentGuard · Auth0 identity controls · MCP authorization ·
-          contextual policy · human approval · immutable audit
+          AgentGuard Â· Auth0 identity controls Â· MCP authorization Â·
+          contextual policy Â· human approval Â· immutable audit
         </footer>
       </div>
     </main>

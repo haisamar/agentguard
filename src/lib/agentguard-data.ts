@@ -55,3 +55,18 @@ export async function getPendingApprovals() {
     "approvals?select=*&status=eq.PENDING&order=created_at.desc"
   );
 }
+
+export type RefundReceipt = {
+  id: string;
+  approval_id: string;
+  identity: string;
+  account_id: string;
+  amount_minor: number;
+  currency: string;
+  simulated: boolean;
+  created_at: string;
+};
+
+export async function getRefundReceipts(): Promise<RefundReceipt[]> {
+  return supabaseQuery("refund_receipts?select=id,approval_id,identity,account_id,amount_minor,currency,simulated,created_at&order=created_at.desc&limit=50");
+}
