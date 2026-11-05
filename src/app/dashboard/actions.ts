@@ -1,35 +1,14 @@
 "use server";
 
-import { auth0 } from "@/lib/auth0";
+import { requireHumanAdmin } from "@/lib/admin-access";
 import { revalidatePath } from "next/cache";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
-const adminEmail = process.env.AGENTGUARD_ADMIN_EMAIL;
+
 
 if (!supabaseUrl || !supabaseSecretKey) {
   throw new Error("Supabase server configuration is missing");
-}
-
-async function requireHumanAdmin() {
-  const session = await auth0.getSession();
-
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!session.user.email) {
-    throw new Error("Authenticated user has no email");
-  }
-
-  if (
-    !adminEmail ||
-    session.user.email.toLowerCase() !== adminEmail.toLowerCase()
-  ) {
-    throw new Error("Forbidden: administrator access required");
-  }
-
-  return session.user;
 }
 
 async function writeAuditEvent(event: {

@@ -6,7 +6,7 @@ import {
   type RefundReceipt,
 } from "@/lib/agentguard-data";
 
-import { auth0 } from "@/lib/auth0";
+import { requireHumanAdmin } from "@/lib/admin-access";
 import {
   identityName,
   identityType,
@@ -143,8 +143,7 @@ function approvalReviewTime(
 }
 
 export default async function DashboardPage() {
-  const session = await auth0.getSession();
-  const humanAdmin = session?.user;
+  const humanAdmin = await requireHumanAdmin();
 
   const [approvals, auditEvents, pendingApprovals, receipts] = (await Promise.all([
     getApprovals(),
