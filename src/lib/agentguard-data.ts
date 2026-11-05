@@ -58,7 +58,7 @@ export async function getPendingApprovals() {
 
 export type RefundReceipt = {
   id: string;
-  approval_id: string;
+  approval_id: string | null;
   identity: string;
   account_id: string;
   amount_minor: number;
@@ -68,5 +68,15 @@ export type RefundReceipt = {
 };
 
 export async function getRefundReceipts(): Promise<RefundReceipt[]> {
-  return supabaseQuery("refund_receipts?select=id,approval_id,identity,account_id,amount_minor,currency,simulated,created_at&order=created_at.desc&limit=50");
+  const [approved, autonomous] = await Promise.all([
+    supabaseQuery("refund_receipts?select=id,approval_id,identity,account_id,amount_minor,currency,simulated,created_at&order=created_at.desc&limit=50"),
+    supabaseQuery("autonomous_refund_receipts?select=id,identity,account_id,amount_minor,currency,simulated,created_at&order=created_at.desc&limit=50"),
+  ]);
+  return [...approved, ...autonomous.map((row: Omit<RefundReceipt, "approval_id">) => ({ ...row, approval_id: null }))]
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 50);
+}
+
+export type AutonomousBudget = { limit_minor: number; spent_minor: number; remaining_minor: number; currency: string; window_hours: number; as_of: string };
+export async function getAutonomousBudget(): Promise<AutonomousBudget> {
+  return supabaseQuery("rpc/autonomous_budget_status");
 }

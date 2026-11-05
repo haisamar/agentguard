@@ -3,6 +3,8 @@ import {
   getAuditEvents,
   getPendingApprovals,
   getRefundReceipts,
+  getAutonomousBudget,
+  type AutonomousBudget,
   type RefundReceipt,
 } from "@/lib/agentguard-data";
 
@@ -145,16 +147,18 @@ function approvalReviewTime(
 export default async function DashboardPage() {
   const humanAdmin = await requireHumanAdmin();
 
-  const [approvals, auditEvents, pendingApprovals, receipts] = (await Promise.all([
+  const [approvals, auditEvents, pendingApprovals, receipts, budget] = (await Promise.all([
     getApprovals(),
     getAuditEvents(),
     getPendingApprovals(),
     getRefundReceipts(),
+    getAutonomousBudget(),
   ])) as [
     ApprovalRow[],
     SecurityAuditEvent[],
     ApprovalRow[],
     RefundReceipt[],
+    AutonomousBudget,
   ];
 
   const deniedEvents = auditEvents.filter(
@@ -736,7 +740,13 @@ export default async function DashboardPage() {
 
         <section className="mt-12" aria-labelledby="receipt-heading">
           <h3 id="receipt-heading" className="text-lg font-semibold">Sandbox refund receipts</h3>
-          <p className="mt-2 text-sm text-zinc-400">Persisted ledger entries for simulated refunds. No real money is transferred. Each approval can create one receipt.</p>
+          <p className="mt-2 text-sm text-zinc-400">Persisted ledger entries for simulated refunds. No real money is transferred. Human-reviewed and autonomous refunds are shown separately below.</p>
+          <div className="mt-5 rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
+            <h4 className="font-medium">Shared autonomous refund budget</h4>
+            <p className="mt-2 text-sm text-zinc-300">${(budget.spent_minor / 100).toFixed(2)} used · ${(budget.remaining_minor / 100).toFixed(2)} remaining of ${(budget.limit_minor / 100).toFixed(2)} USD</p>
+            <p className="mt-2 text-xs text-zinc-500">Rolling {budget.window_hours} hours across all agents and accounts. Requests exceeding the remaining budget require human approval. Human-reviewed refunds use a separate authorization path.</p>
+            <p className="mt-2 text-xs text-zinc-500">Snapshot: {formatTime(budget.as_of)}. Refresh to update; execution rechecks the budget atomically.</p>
+          </div>
           <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10">
             <table className="w-full min-w-[850px] text-left text-sm">
               <caption className="sr-only">Latest 50 sandbox refund receipts</caption>
@@ -746,7 +756,7 @@ export default async function DashboardPage() {
               <tbody>
                 {receipts.length === 0 ? <tr><td colSpan={5} className="px-5 py-8 text-zinc-500">No sandbox receipts recorded yet.</td></tr> : receipts.map(receipt => (
                   <tr key={receipt.id} className="border-t border-white/5">
-                    <td className="px-5 py-4"><p className="font-mono text-xs">{receipt.id}</p><p className="mt-1 font-mono text-xs text-zinc-500">{receipt.approval_id}</p><p className="mt-1 text-xs text-blue-400">{receipt.simulated ? "SIMULATED" : "Review receipt type"}</p></td>
+                    <td className="px-5 py-4"><p className="font-mono text-xs">{receipt.id}</p><p className="mt-1 font-mono text-xs text-zinc-500">{receipt.approval_id ?? "Autonomous · rolling budget"}</p><p className="mt-1 text-xs text-blue-400">{receipt.simulated ? "SIMULATED" : "Review receipt type"}</p></td>
                     <td className="px-5 py-4 font-mono text-xs">{receipt.account_id}</td>
                     <td className="px-5 py-4">{new Intl.NumberFormat("en-US", { style: "currency", currency: receipt.currency }).format(receipt.amount_minor / 100)} {receipt.currency}</td>
                     <td className="px-5 py-4 text-zinc-400">{identityName(receipt.identity)}</td>
