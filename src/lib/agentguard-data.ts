@@ -1,4 +1,5 @@
 import "server-only";
+import { readSupabaseJson } from "./supabase-read";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -16,26 +17,7 @@ const supabaseSecretKey = requireEnv(
 );
 
 async function supabaseQuery(path: string) {
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/${path}`,
-    {
-      headers: {
-        apikey: supabaseSecretKey,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-
-    throw new Error(
-      `Supabase request failed (${response.status}): ${errorText}`
-    );
-  }
-
-  return response.json();
+  return readSupabaseJson(`${supabaseUrl}/rest/v1/${path}`, supabaseSecretKey);
 }
 
 export async function getApprovals() {
