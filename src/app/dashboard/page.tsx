@@ -6,7 +6,10 @@ import {
   getAutonomousBudget,
   type AutonomousBudget,
   type RefundReceipt,
+  getExecutionControl,
+  type ExecutionControl,
 } from "@/lib/agentguard-data";
+import { ExecutionControls } from "./ExecutionControls";
 
 import { requireHumanAdmin } from "@/lib/admin-access";
 import {
@@ -147,18 +150,20 @@ function approvalReviewTime(
 export default async function DashboardPage() {
   const humanAdmin = await requireHumanAdmin();
 
-  const [approvals, auditEvents, pendingApprovals, receipts, budget] = (await Promise.all([
+  const [approvals, auditEvents, pendingApprovals, receipts, budget, executionControl] = (await Promise.all([
     getApprovals(),
     getAuditEvents(),
     getPendingApprovals(),
     getRefundReceipts(),
     getAutonomousBudget(),
+    getExecutionControl(),
   ])) as [
     ApprovalRow[],
     SecurityAuditEvent[],
     ApprovalRow[],
     RefundReceipt[],
     AutonomousBudget,
+    ExecutionControl,
   ];
 
   const deniedEvents = auditEvents.filter(
@@ -738,6 +743,7 @@ export default async function DashboardPage() {
           </div>
         </section>
 
+        <ExecutionControls control={executionControl} approved={approvals.filter((row) => row.status === "APPROVED")} />
         <section className="mt-12" aria-labelledby="receipt-heading">
           <h3 id="receipt-heading" className="text-lg font-semibold">Sandbox refund receipts</h3>
           <p className="mt-2 text-sm text-zinc-400">Persisted ledger entries for simulated refunds. No real money is transferred. Human-reviewed and autonomous refunds are shown separately below.</p>

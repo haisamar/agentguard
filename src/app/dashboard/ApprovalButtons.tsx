@@ -1,6 +1,7 @@
 import {
   approveApproval,
   denyApproval,
+  cancelApproval,
 } from "./actions";
 
 export function ApprovalButtons({
@@ -40,6 +41,10 @@ export function ApprovalButtons({
         >
           Approve
         </button>
+      </form>
+      <form action={cancelApproval} className="col-span-2">
+        <input type="hidden" name="approval_id" value={approvalId} />
+        <button type="submit" className="w-full rounded-lg border border-white/20 px-4 py-2 text-sm text-zinc-300 focus-visible:outline-2">Cancel this request</button>
       </form>
       </div>
     </div>

@@ -1,5 +1,11 @@
 # AgentGuard
 
+> Phase 1 release candidate: see [ADMIN-SECURITY.md](ADMIN-SECURITY.md) before
+> deploying the administrator subject/MFA checks, and [DEPENDENCIES.md](DEPENDENCIES.md)
+> for verified dependency versions. Administrator setup and an actual MFA sign-in
+> must pass before production rollout. Historical examples below are being
+> reconciled with the new refund contract before the competition release.
+
 [![M8ven Live Monitored](https://m8ven.ai/badge/mcp/haisamar-agentguard-1w8g7f)](https://m8ven.ai/mcp/haisamar-agentguard-1w8g7f)
 
 ### Identity Security for AI Agents
@@ -971,6 +977,7 @@ AUTH0_SECRET=
 APP_BASE_URL=http://localhost:3000
 
 AGENTGUARD_ADMIN_EMAIL=
+AGENTGUARD_ADMIN_SUB=
 ```
 
 Never commit `.env.local`.

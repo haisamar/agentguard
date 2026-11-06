@@ -80,3 +80,12 @@ export type AutonomousBudget = { limit_minor: number; spent_minor: number; remai
 export async function getAutonomousBudget(): Promise<AutonomousBudget> {
   return supabaseQuery("rpc/autonomous_budget_status");
 }
+
+export type ExecutionControl = { paused: boolean; updated_at: string };
+export async function getExecutionControl(): Promise<ExecutionControl> {
+  const rows = await supabaseQuery("execution_control?id=eq.1&select=paused,updated_at");
+  if (!Array.isArray(rows) || rows.length !== 1 || typeof rows[0].paused !== "boolean") {
+    throw new Error("Execution control is unavailable");
+  }
+  return rows[0];
+}
