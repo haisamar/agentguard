@@ -17,8 +17,14 @@ export const metadata: Metadata = {
     default: "AgentGuard",
     template: "%s | AgentGuard",
   },
-  description:
-    "Identity security and authorization for autonomous AI agents.",
+  description: "AgentGuard checks AI agent permissions, spending limits, and human approval before simulated refunds execute.",
+  metadataBase: new URL("https://agentguard-eight.vercel.app"),
+  openGraph: {
+    type: "website",
+    siteName: "AgentGuard",
+    title: "AgentGuard — Human control over agent actions",
+    description: "Try a refund safety walkthrough and inspect the recorded deployment evidence.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

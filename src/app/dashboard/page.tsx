@@ -12,6 +12,7 @@ import {
 import { ExecutionControls } from "./ExecutionControls";
 
 import { requireHumanAdmin } from "@/lib/admin-access";
+import { hasFreshSensitiveAuthentication } from "@/lib/admin-policy";
 import {
   identityName,
   identityType,
@@ -34,6 +35,8 @@ type ApprovalRow = {
   action: string;
   payload: {
     amount?: number;
+    amount_minor?: number;
+    currency?: string;
     account_id?: string;
     reason?: string;
   };
@@ -80,15 +83,32 @@ function formatAction(action: string) {
 
 function formatTime(value: string | null) {
   if (!value) {
-    return "â€”";
+    return "—";
   }
+
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "—";
 
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-  }).format(new Date(value));
+    timeZone: "America/Toronto",
+    timeZoneName: "short",
+  }).format(date);
+}
+
+const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+function reviewAmount(payload: ApprovalRow["payload"]) {
+  if (!payload || (payload.currency !== undefined && payload.currency !== "USD")) return null;
+  if (payload.amount_minor !== undefined) {
+    return Number.isSafeInteger(payload.amount_minor) && payload.amount_minor > 0 ? usd.format(payload.amount_minor / 100) : null;
+  }
+  if (typeof payload.amount !== "number" || !Number.isFinite(payload.amount) || payload.amount <= 0) return null;
+  const cents = Math.round(payload.amount * 100);
+  return Number.isSafeInteger(cents) && cents / 100 === payload.amount ? usd.format(payload.amount) : null;
 }
 
 function statusStyles(status: string) {
@@ -149,6 +169,8 @@ function approvalReviewTime(
 
 export default async function DashboardPage() {
   const humanAdmin = await requireHumanAdmin();
+  const recentAuthentication = hasFreshSensitiveAuthentication(humanAdmin);
+  const renderedAt = new Date().getTime();
 
   const [approvals, auditEvents, pendingApprovals, receipts, budget, executionControl] = (await Promise.all([
     getApprovals(),
@@ -238,7 +260,7 @@ export default async function DashboardPage() {
 
             <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              Protection Active
+              {executionControl.paused ? "Refund execution paused" : "Sandbox execution enabled"}
             </div>
 
             <a
@@ -496,15 +518,22 @@ export default async function DashboardPage() {
                   </p>
                 </div>
               ) : (
-                pendingApprovals.map((approval) => (
+                pendingApprovals.map((approval) => {
+                  const created = Date.parse(approval.created_at);
+                  const expiresAt = created + 60 * 60 * 1000;
+                  const expired = !Number.isFinite(created) || created > renderedAt || expiresAt <= renderedAt;
+                  const amount = reviewAmount(approval.payload);
+                  const account = approval.payload?.account_id;
+                  const canReview = approval.action === "issue_refund" && typeof account === "string" && account.trim().length > 0 && amount !== null;
+                  return (
                   <div
                     key={approval.id}
                     className="rounded-2xl border border-amber-500/15 bg-amber-500/[0.035] p-5"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <span className="rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[11px] font-medium text-amber-400">
-                          APPROVAL REQUIRED
+                          {expired ? "EXPIRED" : "APPROVAL REQUIRED"}
                         </span>
 
                         <h4 className="mt-4 font-medium">
@@ -521,29 +550,30 @@ export default async function DashboardPage() {
                         </p>
                       </div>
 
-                      {approval.payload?.amount !== undefined && (
+                      {amount !== null && (
                         <div className="text-right">
                           <p className="text-xl font-semibold">
-                            ${approval.payload.amount}
+                            {amount} USD
                           </p>
 
                           <p className="text-xs text-zinc-600">
-                            Refund
+                            Simulated refund
                           </p>
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-5 rounded-xl border border-white/5 bg-black/20 p-3">
-                      <p className="text-xs text-zinc-500">
-                        {approval.reason}
-                      </p>
-                    </div>
+                    <dl className="mt-5 space-y-3 rounded-xl border border-white/10 bg-black/20 p-3 text-sm">
+                      <div><dt className="text-zinc-400">Destination account</dt><dd className="mt-1 break-all font-mono">{account || "Unavailable"}</dd></div>
+                      <div><dt className="text-zinc-400">Agent’s reason</dt><dd className="mt-1 break-words">{approval.payload?.reason || "No reason supplied"}</dd></div>
+                      <div><dt className="text-zinc-400">Policy reason</dt><dd className="mt-1 break-words">{approval.reason || "Unavailable"}</dd></div>
+                      <div><dt className="text-zinc-400">Review expires</dt><dd className="mt-1">{expired ? "Expired or invalid request time" : formatTime(new Date(expiresAt).toISOString())}</dd></div>
+                    </dl>
 
-                    <ApprovalButtons approvalId={approval.id} />
+                    <ApprovalButtons approvalId={approval.id} approveBlocked={expired ? "This request has expired. Submit a new request to review it." : !canReview ? "The stored transaction details are incomplete. Submit a new request." : !recentAuthentication ? "Re-authenticate before approving this request." : undefined} needsAuthentication={!expired && canReview && !recentAuthentication} />
 
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="font-mono text-xs text-zinc-600">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                      <span className="break-all font-mono text-xs text-zinc-400">
                         {approval.id}
                       </span>
 
@@ -552,7 +582,8 @@ export default async function DashboardPage() {
                       </span>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -777,8 +808,7 @@ export default async function DashboardPage() {
         {/* FOOTER */}
 
         <footer className="mt-14 border-t border-white/10 py-6 text-xs text-zinc-700">
-          AgentGuard Â· Auth0 identity controls Â· MCP authorization Â·
-          contextual policy Â· human approval Â· immutable audit
+          AgentGuard · Auth0 identity · MCP authorization · policy · human review · audit records
         </footer>
       </div>
     </main>

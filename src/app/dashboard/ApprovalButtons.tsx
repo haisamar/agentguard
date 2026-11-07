@@ -6,12 +6,16 @@ import {
 
 export function ApprovalButtons({
   approvalId,
+  approveBlocked,
+  needsAuthentication,
 }: {
   approvalId: string;
+  approveBlocked?: string;
+  needsAuthentication: boolean;
 }) {
   return (
     <div>
-      <p className="mt-4 text-xs text-zinc-500">Approval is valid for one hour from the request time. Expired requests must be submitted again.</p>
+      {approveBlocked ? <p className="mt-4 text-sm text-amber-200">{approveBlocked}{needsAuthentication ? <>{" "}<a className="underline" href="/auth/login?returnTo=%2Fdashboard&max_age=0">Re-authenticate with a passkey</a></> : null}</p> : <p className="mt-4 text-sm text-zinc-300">Approval authorizes this stored transaction. A separate execution step records the simulated receipt.</p>}
       <div className="mt-5 grid grid-cols-2 gap-3">
       <form action={denyApproval}>
         <input
@@ -37,7 +41,8 @@ export function ApprovalButtons({
 
         <button
           type="submit"
-          className="w-full rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-400 transition hover:bg-emerald-500/15"
+          disabled={Boolean(approveBlocked)}
+          className="w-full rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-300 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/5 disabled:text-zinc-400"
         >
           Approve
         </button>
