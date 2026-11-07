@@ -224,7 +224,7 @@ export default async function DashboardPage() {
     ) ?? null;
 
   return (
-    <main className="min-h-screen bg-[#08090b] text-white">
+    <main className="min-h-screen bg-[#080d18] text-white">
       <div className="mx-auto max-w-[1500px] px-5 py-6 sm:px-6 lg:px-8 lg:py-8">
         {/* HEADER */}
 

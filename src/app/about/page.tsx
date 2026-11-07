@@ -25,7 +25,7 @@ export default function CaseStudyPage() {
         </section>
         <div className="mt-8 flex flex-wrap gap-5">
           <Link className={primary} href="/evidence">View the release evidence</Link>
-          <a className="inline-flex min-h-11 items-center text-emerald-300 underline" href="https://github.com/haisamar">Creator on GitHub</a>
+          <a className="inline-flex min-h-11 items-center text-blue-300 underline" href="https://github.com/haisamar">Creator on GitHub</a>
         </div>
       </article>
     </SiteFrame>

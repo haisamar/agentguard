@@ -4,7 +4,7 @@ import { useState } from "react";
 import { primary, secondary } from "../SiteFrame";
 
 const scenarios = [
-  { id: "allow", label: "Routine refund", actor: "Finance Agent", action: "Issue refund", amount: "$100.00", decision: "Allowed", reason: "The agent has refund permission, and the request fits inside the remaining shared budget.", effect: "One simulated receipt. $400 remains in the example budget.", tone: "text-emerald-300" },
+  { id: "allow", label: "Routine refund", actor: "Finance Agent", action: "Issue refund", amount: "$100.00", decision: "Allowed", reason: "The agent has refund permission, and the request fits inside the remaining shared budget.", effect: "One simulated receipt. $400 remains in the example budget.", tone: "text-blue-300" },
   { id: "scope", label: "Missing permission", actor: "Sales Agent", action: "Issue refund", amount: "$755.00", decision: "Denied", reason: "Sales has CRM access but lacks the finance:refund scope. The request is rejected before the budget check.", effect: "No approval or receipt is created.", tone: "text-rose-300" },
   { id: "human", label: "Human review", actor: "Finance Agent", action: "Issue refund", amount: "$755.00", decision: "Waiting for review", reason: "The refund exceeds the $500 autonomous limit. Execution requires an independent human decision on the stored request.", effect: "One pending approval. No receipt.", tone: "text-amber-200" },
   { id: "split", label: "Split the budget", actor: "Finance Agent", action: "Issue a second refund after $300 already used", amount: "$250.00", decision: "Waiting for review", reason: "Only $200 remains in the shared rolling 24-hour budget. Splitting a larger amount into smaller requests does not reset the budget.", effect: "The second request creates no receipt while pending.", tone: "text-amber-200" },
@@ -17,7 +17,7 @@ type Stage = "ready" | "decision" | "approved" | "executed" | "replayed" | "canc
 
 const reviewStages = {
   approved: { decision: "Approved", reason: "The simulated operator approved this exact stored transaction. The agent must still execute it.", effect: "Approved request. No receipt yet.", tone: "text-sky-200" },
-  executed: { decision: "Executed", reason: "The request is still approved, unexpired, and belongs to the requesting agent.", effect: "One simulated receipt for $755.00 USD.", tone: "text-emerald-300" },
+  executed: { decision: "Executed", reason: "The request is still approved, unexpired, and belongs to the requesting agent.", effect: "One simulated receipt for $755.00 USD.", tone: "text-blue-300" },
   replayed: { decision: "Replay denied", reason: "The approval is already executed. It cannot authorize a second effect.", effect: "The ledger still contains exactly one simulated receipt.", tone: "text-rose-300" },
   cancelled: { decision: "Cancelled", reason: "The simulated operator cancelled the request before execution.", effect: "No receipt. This request can no longer execute.", tone: "text-rose-300" },
 };
@@ -33,15 +33,15 @@ export function RefundWalkthrough() {
         <legend className="px-2 text-sm font-semibold">Choose a scenario</legend>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
           {scenarios.map((item, itemIndex) => (
-            <label key={item.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-white/10 px-3 py-2 text-sm has-checked:border-emerald-300/45 has-checked:bg-emerald-300/10 hover:bg-white/5">
-              <input className="accent-emerald-300" type="radio" name="scenario" checked={itemIndex === index} onChange={() => { setIndex(itemIndex); setStage("ready"); }} />
+            <label key={item.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-white/10 px-3 py-2 text-sm has-checked:border-blue-300/45 has-checked:bg-blue-300/10 hover:bg-white/5">
+              <input className="accent-blue-300" type="radio" name="scenario" checked={itemIndex === index} onChange={() => { setIndex(itemIndex); setStage("ready"); }} />
               {item.label}
             </label>
           ))}
         </div>
       </fieldset>
-      <section aria-labelledby="request-heading" className="rounded-3xl border border-white/10 bg-[#101c22] p-5 sm:p-7">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300">Example request</p>
+      <section aria-labelledby="request-heading" className="rounded-3xl border border-white/10 bg-[#111c30] p-5 sm:p-7">
+        <p className="text-xs font-semibold uppercase tracking-widest text-blue-300">Example request</p>
         <h2 id="request-heading" className="mt-2 text-2xl font-semibold">{scenario.label}</h2>
         <dl className="mt-5 grid gap-4 rounded-xl border border-white/10 p-4 text-sm sm:grid-cols-2">
           <div><dt className="text-slate-400">Requester</dt><dd className="mt-1 font-semibold">{scenario.actor}</dd></div>

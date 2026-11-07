@@ -1,0 +1,277 @@
+{
+  "mode": "isolated in-memory database; synthetic USD ledger",
+  "engine": "18.6",
+  "migration_sha256_lf": {
+    "schema.sql": "0de7a2fa5de7686e23e6ff7a44423159892d7cd044c88da88e8f9324b6f291f7",
+    "migrations/001_refund_receipts.sql": "0823df0ac47e7124b276b848f177cdfd958e9d584bb95abb4d4a549051c66a2a",
+    "migrations/002_autonomous_budget.sql": "36514e297233722f71097dadeea6b99b1e29973075463c7863fd735f4cd4c9f7",
+    "migrations/003_autonomous_budget_status.sql": "ef21a47d3254499bb0a664b892e3f5d91e86da61f7bb1d637ce32925b6d499b7",
+    "migrations/004_atomic_review.sql": "723122e26a53a8a21c008e5340958183a36b05169b4568a3d38c532ce95df56c",
+    "migrations/005_approval_transaction_binding.sql": "5f5737c1993e7aa809499164cce0c3a2f7aa9c7a37523a84badcef8fbcb486f1",
+    "migrations/006_idempotent_refund_requests.sql": "6e5345e45933e3224dc8f496bd4ab52940613023af3b1c71d4834df912ad9cdd",
+    "migrations/007_execution_pause_and_cancellation.sql": "a2e253188664e98d49d7f91c7ec33b261eee88951874ef8b33c88911e73a66e5",
+    "migrations/008_review_time_after_lock.sql": "45af0eab19fa4cfbf06bc994f46364f3d8fbba4345e29960cb639a23a82b9bf6"
+  },
+  "sql_assertion_files_passed": [
+    "approval_transaction_binding.sql",
+    "atomic_review_rollback.sql",
+    "execution_controls.sql",
+    "execution_controls_rollback.sql",
+    "refund_request_audit_rollback.sql",
+    "refund_request_idempotency.sql",
+    "review_expiry.sql"
+  ],
+  "matching_expected_effects": {
+    "unguarded": 1,
+    "scope_and_threshold": 3,
+    "agentguard_database": 10
+  },
+  "cases": [
+    {
+      "name": "routine refund",
+      "expected": {
+        "receipts": 1,
+        "cents": 10000
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 1,
+          "cents": 10000,
+          "matches_expected_effect": true
+        },
+        "scope_and_threshold": {
+          "receipts": 1,
+          "cents": 10000,
+          "matches_expected_effect": true
+        },
+        "agentguard_database": {
+          "receipts": 1,
+          "cents": 10000,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "missing refund scope",
+      "expected": {
+        "receipts": 0,
+        "cents": 0
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 1,
+          "cents": 10000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 0,
+          "cents": 0,
+          "matches_expected_effect": true
+        },
+        "agentguard_database": {
+          "receipts": 0,
+          "cents": 0,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "above threshold without review",
+      "expected": {
+        "receipts": 0,
+        "cents": 0
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 2,
+          "cents": 151000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 0,
+          "cents": 0,
+          "matches_expected_effect": true
+        },
+        "agentguard_database": {
+          "receipts": 0,
+          "cents": 0,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "two sub-threshold requests exceed shared budget",
+      "expected": {
+        "receipts": 1,
+        "cents": 30000
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 2,
+          "cents": 55000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 2,
+          "cents": 55000,
+          "matches_expected_effect": false
+        },
+        "agentguard_database": {
+          "receipts": 1,
+          "cents": 30000,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "identical submission retry",
+      "expected": {
+        "receipts": 1,
+        "cents": 10000
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 2,
+          "cents": 20000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 2,
+          "cents": 20000,
+          "matches_expected_effect": false
+        },
+        "agentguard_database": {
+          "receipts": 1,
+          "cents": 10000,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "same request ID with changed amount",
+      "expected": {
+        "receipts": 1,
+        "cents": 10000
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 2,
+          "cents": 21000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 2,
+          "cents": 21000,
+          "matches_expected_effect": false
+        },
+        "agentguard_database": {
+          "receipts": 1,
+          "cents": 10000,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "approved refund executes once despite replay",
+      "expected": {
+        "receipts": 1,
+        "cents": 75500
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 3,
+          "cents": 226500,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 2,
+          "cents": 151000,
+          "matches_expected_effect": false
+        },
+        "agentguard_database": {
+          "receipts": 1,
+          "cents": 75500,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "different agent tries to execute approval",
+      "expected": {
+        "receipts": 0,
+        "cents": 0
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 2,
+          "cents": 151000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 1,
+          "cents": 75500,
+          "matches_expected_effect": false
+        },
+        "agentguard_database": {
+          "receipts": 0,
+          "cents": 0,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "approved request cancelled before execution",
+      "expected": {
+        "receipts": 0,
+        "cents": 0
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 2,
+          "cents": 151000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 1,
+          "cents": 75500,
+          "matches_expected_effect": false
+        },
+        "agentguard_database": {
+          "receipts": 0,
+          "cents": 0,
+          "matches_expected_effect": true
+        }
+      }
+    },
+    {
+      "name": "approved and autonomous execution while paused",
+      "expected": {
+        "receipts": 0,
+        "cents": 0
+      },
+      "results": {
+        "unguarded": {
+          "receipts": 3,
+          "cents": 161000,
+          "matches_expected_effect": false
+        },
+        "scope_and_threshold": {
+          "receipts": 2,
+          "cents": 85500,
+          "matches_expected_effect": false
+        },
+        "agentguard_database": {
+          "receipts": 0,
+          "cents": 0,
+          "matches_expected_effect": true
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "The scope check in this comparison uses fixture identities, not OAuth tokens.",
+    "The SQL assertions and full policy use the actual AgentGuard migrations; baseline behavior is illustrative.",
+    "One in-memory PostgreSQL connection. No concurrency, real human review, live API, model, or payment is tested here."
+  ],
+  "source_commit": "be4ad7127bf190bf4950594364f173cff307f940"
+}

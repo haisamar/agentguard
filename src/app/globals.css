@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080e13;
+  --background: #080d18;
   --foreground: #f1f5f9;
 }
 
@@ -19,6 +19,6 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid #a7f3d0;
+  outline: 2px solid #93c5fd;
   outline-offset: 4px;
 }
