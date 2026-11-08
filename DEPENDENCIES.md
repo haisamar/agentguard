@@ -31,8 +31,9 @@ React/React DOM types 19.3.0, TypeScript native compiler 7.0.2.
   after the minimatch override. This does not establish absence of vulnerabilities;
   check maintainer advisories as well.
 - Webpack reports Auth0 SDK dynamic-import warnings for optional DPoP utilities.
-  Build succeeds; deployed sign-in verification remains a separate release gate.
+  The build succeeds. The [dated hosted report](https://agentguard-eight.vercel.app/evidence)
+  records the separately verified passkey sign-in and review.
 
-These changes are locally verified; this document does not assert deployment.
+The version and advisory observations above are dated November 5.
 
 Reference: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0

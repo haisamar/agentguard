@@ -1,6 +1,6 @@
 # Administrator authorization and release prerequisites
 
-Local Phase 1 code requires both `AGENTGUARD_ADMIN_EMAIL` and
+The dashboard requires both `AGENTGUARD_ADMIN_EMAIL` and
 `AGENTGUARD_ADMIN_SUB`. The latter is the exact subject of the intended human
 administrator's verified Auth0 session. Missing configuration, a different
 subject, unverified email, or a mismatched email denies access. Do not infer the
@@ -36,13 +36,15 @@ protect against a compromised privileged backend/database administrator.
 2. Check existing Auth0 MFA entitlement/factors; obtain actual-price approval
    before any paid change. Scope any tenant Action to AgentGuard's client ID.
 3. Confirm no-MFA and stale-MFA approval/resume attempts are rejected.
-4. Confirm an actual fresh MFA login permits the intended approval/resume.
+4. Confirm a fresh passkey or MFA login permits approval and resume.
 5. Confirm non-admin and unverified users cannot call any server action.
 6. Verify the new dashboard pause/cancel UI and backend workflow together.
 
 Policy and Action tests cover malformed and stale claims. The positive passkey
-flow and its receipt were verified in production. The complete live negative
-browser matrix (non-admin, unverified, stale and password-only) remains open.
+flow and its receipt were verified in production. Local HTTP verification also
+rejected direct approval and resume submissions under five disallowed states
+before any write. The complete live negative browser matrix (non-admin,
+unverified, stale and password-only) remains open. See the [evidence index](https://github.com/haisamar/agentguard-mcp/blob/main/SUBMISSION-EVIDENCE.md).
 
 References:
 - https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication
