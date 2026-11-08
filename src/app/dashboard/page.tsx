@@ -418,14 +418,14 @@ export default async function DashboardPage() {
           </div>
 
           <div className="max-w-3xl rounded-2xl border border-blue-500/15 bg-blue-500/[0.025] p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 font-semibold text-blue-400">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 font-semibold text-blue-400">
                   HU
                 </div>
 
-                <div>
-                  <p className="font-medium">
+                <div className="min-w-0">
+                  <p className="break-all font-medium">
                     {humanAdmin?.name ||
                       humanAdmin?.email ||
                       "Human Administrator"}
@@ -506,7 +506,7 @@ export default async function DashboardPage() {
               {pendingApprovals.length === 0 ? (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-8 text-center">
                   <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
-                    âœ“
+                    ✓
                   </div>
 
                   <p className="mt-4 text-sm text-zinc-300">
@@ -706,7 +706,7 @@ export default async function DashboardPage() {
                           <span className="text-sm font-medium text-zinc-300">
                             {approval.payload?.amount !== undefined
                               ? `$${approval.payload.amount}`
-                              : "â€”"}
+                              : "—"}
                           </span>
                         </td>
 
@@ -753,7 +753,7 @@ export default async function DashboardPage() {
                             </div>
                           ) : (
                             <span className="text-sm text-zinc-400">
-                              â€”
+                              —
                             </span>
                           )}
                         </td>
