@@ -1,5 +1,7 @@
 # AgentGuard
 
+[![M8ven Live Monitored](https://m8ven.ai/badge/mcp/haisamar-agentguard-1w8g7f)](https://m8ven.ai/mcp/haisamar-agentguard-1w8g7f)
+
 AgentGuard lets an AI support agent request a simulated refund while enforcing
 OAuth permissions, a shared spending budget, and human review at the point of
 execution. This repository contains the Next.js site and protected operator
