@@ -22,3 +22,11 @@ body {
   outline: 2px solid #93c5fd;
   outline-offset: 4px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

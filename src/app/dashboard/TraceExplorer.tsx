@@ -332,7 +332,7 @@ export function TraceExplorer({
           </span>
         </div>
 
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-zinc-400">
           Explore real AgentGuard authorization outcomes from the audit and
           approval records.
         </p>
@@ -385,17 +385,17 @@ export function TraceExplorer({
               />
             </div>
 
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-500">
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-zinc-400">
               {scenario.subtitle}
             </p>
           </div>
 
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-zinc-600">
+            <p className="text-[10px] uppercase tracking-wider text-zinc-400">
               Trace Reference
             </p>
 
-            <p className="mt-1 max-w-[290px] break-all font-mono text-xs leading-5 text-zinc-500">
+            <p className="mt-1 max-w-[290px] break-all font-mono text-xs leading-5 text-zinc-400">
               {scenario.reference}
             </p>
           </div>
@@ -436,7 +436,7 @@ export function TraceExplorer({
               />
             )}
 
-            <div className="ml-auto text-xs text-zinc-600">
+            <div className="ml-auto text-xs text-zinc-400">
               Real persisted security outcome
             </div>
           </div>
@@ -475,11 +475,12 @@ function TraceTab({
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={`rounded-lg border px-4 py-2 text-xs font-medium transition ${
         active
           ? activeStyles[tone]
-          : "border-white/10 bg-white/[0.02] text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300"
+          : "border-white/10 bg-white/[0.02] text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-300"
       }`}
     >
       {label}
@@ -541,7 +542,7 @@ function TraceStepCard({
     neutral: {
       border: "border-white/10",
       bg: "bg-white/[0.02]",
-      number: "text-zinc-500",
+      number: "text-zinc-400",
       dot: "bg-zinc-600",
     },
   };
@@ -564,7 +565,7 @@ function TraceStepCard({
         />
       </div>
 
-      <p className="mt-5 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+      <p className="mt-5 text-[10px] font-medium uppercase tracking-wider text-zinc-400">
         {label}
       </p>
 
@@ -572,7 +573,7 @@ function TraceStepCard({
         {title}
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-zinc-600">
+      <p className="mt-2 text-xs leading-5 text-zinc-400">
         {description}
       </p>
     </div>
@@ -590,7 +591,7 @@ function ContextValue({
 }) {
   return (
     <>
-      <span className="text-xs text-zinc-600">
+      <span className="text-xs text-zinc-400">
         {label}
       </span>
 

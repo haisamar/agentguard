@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   identityName,
@@ -121,20 +121,11 @@ export function SecurityActivity({
 }) {
   const [selectedEvent, setSelectedEvent] =
     useState<SecurityAuditEvent | null>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setSelectedEvent(null);
-      }
-    }
-
-    window.addEventListener("keydown", handleEscape);
-
-    return () => {
-      window.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
+    if (selectedEvent && dialog.current && !dialog.current.open) dialog.current.showModal();
+  }, [selectedEvent]);
 
   return (
     <>
@@ -152,13 +143,13 @@ export function SecurityActivity({
               </span>
             </div>
 
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-zinc-400">
               Authorization and policy decisions. Select an event to inspect
               its security context.
             </p>
           </div>
 
-          <span className="text-xs text-zinc-600">
+          <span className="text-xs text-zinc-400">
             Latest {Math.min(totalCount, events.length)}
           </span>
         </div>
@@ -170,7 +161,7 @@ export function SecurityActivity({
                 No security events yet
               </p>
 
-              <p className="mt-1 text-xs text-zinc-600">
+              <p className="mt-1 text-xs text-zinc-400">
                 Authorization decisions will appear here.
               </p>
             </div>
@@ -183,7 +174,8 @@ export function SecurityActivity({
                   key={event.id}
                   type="button"
                   onClick={() => setSelectedEvent(event)}
-                  className={`group flex w-full gap-4 p-4 text-left transition hover:bg-white/[0.035] ${
+                  aria-haspopup="dialog"
+                  className={`group flex w-full flex-wrap gap-x-4 gap-y-2 p-4 text-left transition hover:bg-white/[0.035] sm:flex-nowrap ${
                     index !== events.length - 1
                       ? "border-b border-white/[0.06]"
                       : ""
@@ -225,12 +217,12 @@ export function SecurityActivity({
                     </p>
 
                     {event.reason && (
-                      <p className="mt-1.5 text-xs leading-5 text-zinc-600">
+                      <p className="mt-1.5 text-xs leading-5 text-zinc-400">
                         {event.reason}
                       </p>
                     )}
 
-                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-600">
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-400">
                       {event.required_scope && (
                         <span>
                           Scope:{" "}
@@ -241,19 +233,19 @@ export function SecurityActivity({
                       )}
 
                       {event.approval_id && (
-                        <span className="font-mono">
+                        <span className="break-all font-mono">
                           {event.approval_id}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 items-start gap-3">
-                    <span className="whitespace-nowrap text-xs text-zinc-600">
+                  <div className="ml-6 flex w-full shrink-0 items-start gap-3 sm:ml-0 sm:w-auto">
+                    <span className="whitespace-nowrap text-xs text-zinc-400">
                       {formatTime(event.created_at)}
                     </span>
 
-                    <span className="text-lg leading-none text-zinc-700 transition group-hover:translate-x-0.5 group-hover:text-zinc-400">
+                    <span className="text-lg leading-none text-zinc-400 transition group-hover:translate-x-0.5 group-hover:text-zinc-400">
                       ›
                     </span>
                   </div>
@@ -267,15 +259,7 @@ export function SecurityActivity({
       {/* SECURITY EVENT DRAWER */}
 
       {selectedEvent && (
-        <>
-          <button
-            type="button"
-            aria-label="Close security event"
-            onClick={() => setSelectedEvent(null)}
-            className="fixed inset-0 z-40 cursor-default bg-black/65 backdrop-blur-[1px]"
-          />
-
-          <aside className="fixed right-0 top-0 z-50 h-screen w-full max-w-[540px] overflow-y-auto border-l border-white/10 bg-[#0b0c0f] shadow-2xl">
+          <dialog ref={dialog} aria-labelledby="security-event-title" onClose={() => setSelectedEvent(null)} className="fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-none w-full max-w-[540px] overflow-y-auto border-l border-white/10 bg-[#0b0c0f] text-white shadow-2xl backdrop:bg-black/65">
             <div className="sticky top-0 z-10 border-b border-white/10 bg-[#0b0c0f]/95 px-7 py-6 backdrop-blur">
               <div className="flex items-start justify-between gap-5">
                 <div>
@@ -286,24 +270,24 @@ export function SecurityActivity({
                       )}`}
                     />
 
-                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
+                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">
                       Security Event
                     </p>
                   </div>
 
-                  <h2 className="mt-3 text-xl font-semibold">
+                  <h2 id="security-event-title" className="mt-3 text-xl font-semibold">
                     {formatAction(selectedEvent.action)}
                   </h2>
 
-                  <p className="mt-1 text-sm text-zinc-500">
+                  <p className="mt-1 text-sm text-zinc-400">
                     Authorization decision details
                   </p>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => setSelectedEvent(null)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-xl text-zinc-500 transition hover:bg-white/5 hover:text-white"
+                  onClick={() => dialog.current?.close()}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-xl text-zinc-400 transition hover:bg-white/5 hover:text-white"
                   aria-label="Close"
                 >
                   ×
@@ -315,7 +299,7 @@ export function SecurityActivity({
               {/* DECISION */}
 
               <section>
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-400">
                   Decision
                 </p>
 
@@ -341,7 +325,7 @@ export function SecurityActivity({
               <section className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-400">
                       Identity
                     </p>
 
@@ -360,11 +344,11 @@ export function SecurityActivity({
                 </div>
 
                 <div className="mt-4 border-t border-white/[0.06] pt-4">
-                  <p className="text-[10px] uppercase tracking-wider text-zinc-600">
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-400">
                     Raw Identity
                   </p>
 
-                  <p className="mt-2 break-all font-mono text-xs leading-5 text-zinc-500">
+                  <p className="mt-2 break-all font-mono text-xs leading-5 text-zinc-400">
                     {selectedEvent.identity}
                   </p>
                 </div>
@@ -373,7 +357,7 @@ export function SecurityActivity({
               {/* SECURITY CONTEXT */}
 
               <section>
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-400">
                   Security Context
                 </p>
 
@@ -413,7 +397,7 @@ export function SecurityActivity({
               {/* METADATA */}
 
               <section>
-                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+                <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-400">
                   Event Metadata
                 </p>
 
@@ -439,7 +423,7 @@ export function SecurityActivity({
                   </div>
                 ) : (
                   <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                    <p className="text-sm text-zinc-600">
+                    <p className="text-sm text-zinc-400">
                       No additional metadata recorded.
                     </p>
                   </div>
@@ -453,15 +437,14 @@ export function SecurityActivity({
                   Audit Integrity
                 </p>
 
-                <p className="mt-2 text-xs leading-5 text-zinc-500">
+                <p className="mt-2 text-xs leading-5 text-zinc-400">
                   This event was recorded by AgentGuard when the authorization
                   or policy decision occurred. Dashboard users can inspect the
                   event but cannot modify it from this interface.
                 </p>
               </section>
             </div>
-          </aside>
-        </>
+          </dialog>
       )}
     </>
   );
@@ -480,11 +463,11 @@ function DetailRow({
 }) {
   return (
     <div
-      className={`grid grid-cols-[150px_1fr] gap-4 px-4 py-3.5 ${
+      className={`grid gap-2 px-4 py-3.5 sm:grid-cols-[minmax(0,150px)_minmax(0,1fr)] sm:gap-4 ${
         !last ? "border-b border-white/[0.06]" : ""
       }`}
     >
-      <span className="text-xs text-zinc-600">
+      <span className="text-xs text-zinc-400">
         {label}
       </span>
 

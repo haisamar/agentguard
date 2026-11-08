@@ -10,7 +10,7 @@ Before deployment, securely configure the intended subject in local/Vercel
 environments and verify it against an actual login. Do not publish the value.
 The intended subject and verified email were inspected in Auth0 on November 6,
 2026. The subject was configured in local and Vercel environments. Fresh passkey
-login reached production; stricter approval/resume verification remains pending.
+login, approval, and resume succeeded in the November 6 production verification.
 
 ## Sensitive actions
 
@@ -20,11 +20,10 @@ passkey assurance described below, or a verified session carrying
 future, stale, or incorrectly typed authentication time is rejected. Token
 issuance time (`iat`) is never treated as proof of recent authentication.
 
-The SDK session hook retains these verified claims alongside default identity
-claims. The dashboard links to login with `max_age=0` and the MFA `acr_values`.
-Auth0 must actually enforce MFA for this AgentGuard application and the admin
-must enroll a supported factor. URL parameters alone do not prove completion.
-If the tenant does not return the required claims, these actions remain blocked.
+The SDK session hook retains verified claims alongside default identity claims.
+The dashboard uses `max_age=0` to prompt fresh sign-in; the active deployment
+uses the passkey path below. URL parameters alone do not prove authentication
+method or recency. Missing required assurance blocks approval and resume.
 
 Denying, cancelling, and pausing still require the pinned administrator session;
 they do not require fresh MFA, so an administrator can stop activity promptly.
@@ -41,9 +40,9 @@ protect against a compromised privileged backend/database administrator.
 5. Confirm non-admin and unverified users cannot call any server action.
 6. Verify the new dashboard pause/cancel UI and backend workflow together.
 
-Policy and Action tests pass locally; provider configuration, browser checks and
-real-user end-to-end verification remain release gates. Current production
-frontend is unchanged until a coordinated deployment.
+Policy and Action tests cover malformed and stale claims. The positive passkey
+flow and its receipt were verified in production. The complete live negative
+browser matrix (non-admin, unverified, stale and password-only) remains open.
 
 References:
 - https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication
@@ -72,9 +71,8 @@ event cannot become fresh through a subsequent password login.
 The application validates the claim shape, exact method, and timestamp (at most
 300 seconds old, no future dates); absent or invalid evidence denies sensitive
 actions. This is passkey authentication, not a claim that paid Auth0 MFA ran.
-The Action was deployed and bound to Login (All changes are live). Its signed
-claim must still be verified through the SDK, with positive/negative browser flows tested before stricter application
-deployment. Passkey enrollment/recovery remains in Auth0's trust boundary; do
+The Action was deployed and bound to Login. The protected actions succeeded
+after fresh passkey sign-in. Passkey enrollment/recovery remains in Auth0's trust boundary; do
 not permit password-only approval as a recovery fallback. No new authenticator
 secret storage or authentication dependencies were added to AgentGuard.
 

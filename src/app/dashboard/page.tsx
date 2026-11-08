@@ -239,7 +239,7 @@ export default async function DashboardPage() {
                 AgentGuard
               </h1>
 
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-zinc-400">
                 Identity Security for AI Agents
               </p>
             </div>
@@ -253,7 +253,7 @@ export default async function DashboardPage() {
                   "Authenticated Admin"}
               </p>
 
-              <p className="text-xs text-zinc-600">
+              <p className="text-xs text-zinc-400">
                 Human Administrator
               </p>
             </div>
@@ -283,7 +283,7 @@ export default async function DashboardPage() {
             Agent activity and authorization
           </h2>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
             Monitor AI identities, permission decisions, sensitive actions,
             human approvals, and security events across connected tools.
           </p>
@@ -332,13 +332,13 @@ export default async function DashboardPage() {
                 </span>
               </div>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-zinc-400">
                 Least-privilege OAuth permissions assigned to autonomous
                 runtimes.
               </p>
             </div>
 
-            <span className="text-sm text-zinc-600">
+            <span className="text-sm text-zinc-400">
               {AGENTS.length} identities
             </span>
           </div>
@@ -364,7 +364,7 @@ export default async function DashboardPage() {
                         {agent.name}
                       </p>
 
-                      <p className="mt-0.5 text-xs text-zinc-500">
+                      <p className="mt-0.5 text-xs text-zinc-400">
                         {agent.role}
                       </p>
                     </div>
@@ -377,7 +377,7 @@ export default async function DashboardPage() {
                 </div>
 
                 <div className="mt-5">
-                  <p className="text-xs font-medium uppercase tracking-wider text-zinc-600">
+                  <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
                     Granted scopes
                   </p>
 
@@ -411,7 +411,7 @@ export default async function DashboardPage() {
               </span>
             </div>
 
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-zinc-400">
               Authenticated human identity responsible for reviewing
               sensitive agent actions.
             </p>
@@ -431,7 +431,7 @@ export default async function DashboardPage() {
                       "Human Administrator"}
                   </p>
 
-                  <p className="mt-0.5 text-xs text-zinc-500">
+                  <p className="mt-0.5 text-xs text-zinc-400">
                     Human Administrator
                   </p>
                 </div>
@@ -445,7 +445,7 @@ export default async function DashboardPage() {
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                   Identity Provider
                 </p>
 
@@ -455,7 +455,7 @@ export default async function DashboardPage() {
               </div>
 
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                   Responsibility
                 </p>
 
@@ -497,7 +497,7 @@ export default async function DashboardPage() {
                 </span>
               </div>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-zinc-400">
                 Sensitive actions requiring human review.
               </p>
             </div>
@@ -513,7 +513,7 @@ export default async function DashboardPage() {
                     No pending approvals
                   </p>
 
-                  <p className="mt-1 text-xs text-zinc-600">
+                  <p className="mt-1 text-xs text-zinc-400">
                     All sensitive actions have been reviewed.
                   </p>
                 </div>
@@ -540,7 +540,7 @@ export default async function DashboardPage() {
                           {formatAction(approval.action)}
                         </h4>
 
-                        <p className="mt-1 text-sm text-zinc-500">
+                        <p className="mt-1 text-sm text-zinc-400">
                           Requested by{" "}
                           <span className="text-zinc-300">
                             {identityName(
@@ -556,7 +556,7 @@ export default async function DashboardPage() {
                             {amount} USD
                           </p>
 
-                          <p className="text-xs text-zinc-600">
+                          <p className="text-xs text-zinc-400">
                             Simulated refund
                           </p>
                         </div>
@@ -577,7 +577,7 @@ export default async function DashboardPage() {
                         {approval.id}
                       </span>
 
-                      <span className="text-xs text-zinc-600">
+                      <span className="text-xs text-zinc-400">
                         {formatTime(approval.created_at)}
                       </span>
                     </div>
@@ -605,21 +605,21 @@ export default async function DashboardPage() {
                 Approval History
               </h3>
 
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-zinc-400">
                 Full lifecycle of sensitive actions reviewed by AgentGuard.
               </p>
             </div>
 
-            <span className="text-sm text-zinc-600">
+            <span className="text-sm text-zinc-400">
               {approvals.length} total
             </span>
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Scrollable approval history">
               <table className="w-full min-w-[1000px] text-left">
                 <thead>
-                  <tr className="border-b border-white/[0.07] bg-white/[0.02] text-[11px] uppercase tracking-wider text-zinc-600">
+                  <tr className="border-b border-white/[0.07] bg-white/[0.02] text-[11px] uppercase tracking-wider text-zinc-400">
                     <th className="px-5 py-4 font-medium">
                       Approval
                     </th>
@@ -659,7 +659,7 @@ export default async function DashboardPage() {
                     <tr>
                       <td
                         colSpan={8}
-                        className="px-5 py-12 text-center text-sm text-zinc-600"
+                        className="px-5 py-12 text-center text-sm text-zinc-400"
                       >
                         No approval history yet.
                       </td>
@@ -671,7 +671,7 @@ export default async function DashboardPage() {
                         className="border-b border-white/[0.05] transition last:border-b-0 hover:bg-white/[0.02]"
                       >
                         <td className="px-5 py-3.5">
-                          <span className="font-mono text-xs text-zinc-500">
+                          <span className="font-mono text-xs text-zinc-400">
                             {approval.id}
                           </span>
                         </td>
@@ -696,7 +696,7 @@ export default async function DashboardPage() {
                           </p>
 
                           {approval.payload?.account_id && (
-                            <p className="mt-1 font-mono text-[11px] text-zinc-600">
+                            <p className="mt-1 font-mono text-[11px] text-zinc-400">
                               {approval.payload.account_id}
                             </p>
                           )}
@@ -744,7 +744,7 @@ export default async function DashboardPage() {
                               </div>
 
                               {approvalReviewTime(approval) && (
-                                <p className="mt-1 text-[11px] text-zinc-600">
+                                <p className="mt-1 text-[11px] text-zinc-400">
                                   {formatTime(
                                     approvalReviewTime(approval)
                                   )}
@@ -752,17 +752,17 @@ export default async function DashboardPage() {
                               )}
                             </div>
                           ) : (
-                            <span className="text-sm text-zinc-600">
+                            <span className="text-sm text-zinc-400">
                               â€”
                             </span>
                           )}
                         </td>
 
-                        <td className="px-5 py-4 text-xs text-zinc-500">
+                        <td className="px-5 py-4 text-xs text-zinc-400">
                           {formatTime(approval.created_at)}
                         </td>
 
-                        <td className="px-5 py-4 text-xs text-zinc-500">
+                        <td className="px-5 py-4 text-xs text-zinc-400">
                           {formatTime(approval.executed_at)}
                         </td>
                       </tr>
@@ -781,19 +781,19 @@ export default async function DashboardPage() {
           <div className="mt-5 rounded-xl border border-blue-500/20 bg-blue-500/5 p-5">
             <h4 className="font-medium">Shared autonomous refund budget</h4>
             <p className="mt-2 text-sm text-zinc-300">${(budget.spent_minor / 100).toFixed(2)} used · ${(budget.remaining_minor / 100).toFixed(2)} remaining of ${(budget.limit_minor / 100).toFixed(2)} USD</p>
-            <p className="mt-2 text-xs text-zinc-500">Rolling {budget.window_hours} hours across all agents and accounts. Requests exceeding the remaining budget require human approval. Human-reviewed refunds use a separate authorization path.</p>
-            <p className="mt-2 text-xs text-zinc-500">Snapshot: {formatTime(budget.as_of)}. Refresh to update; execution rechecks the budget atomically.</p>
+            <p className="mt-2 text-xs text-zinc-400">Rolling {budget.window_hours} hours across all agents and accounts. Requests exceeding the remaining budget require human approval. Human-reviewed refunds use a separate authorization path.</p>
+            <p className="mt-2 text-xs text-zinc-400">Snapshot: {formatTime(budget.as_of)}. Refresh to update; execution rechecks the budget atomically.</p>
           </div>
-          <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10">
+          <div className="mt-5 overflow-x-auto rounded-2xl border border-white/10" tabIndex={0} role="region" aria-label="Scrollable refund receipts">
             <table className="w-full min-w-[850px] text-left text-sm">
               <caption className="sr-only">Latest 50 sandbox refund receipts</caption>
               <thead className="bg-white/5 text-zinc-400">
                 <tr>{["Receipt / approval", "Account", "Amount", "Execution identity", "Recorded"].map(label => <th key={label} scope="col" className="px-5 py-4 font-medium">{label}</th>)}</tr>
               </thead>
               <tbody>
-                {receipts.length === 0 ? <tr><td colSpan={5} className="px-5 py-8 text-zinc-500">No sandbox receipts recorded yet.</td></tr> : receipts.map(receipt => (
+                {receipts.length === 0 ? <tr><td colSpan={5} className="px-5 py-8 text-zinc-400">No sandbox receipts recorded yet.</td></tr> : receipts.map(receipt => (
                   <tr key={receipt.id} className="border-t border-white/5">
-                    <td className="px-5 py-4"><p className="font-mono text-xs">{receipt.id}</p><p className="mt-1 font-mono text-xs text-zinc-500">{receipt.approval_id ?? "Autonomous · rolling budget"}</p><p className="mt-1 text-xs text-blue-400">{receipt.simulated ? "SIMULATED" : "Review receipt type"}</p></td>
+                    <td className="px-5 py-4"><p className="font-mono text-xs">{receipt.id}</p><p className="mt-1 font-mono text-xs text-zinc-400">{receipt.approval_id ?? "Autonomous · rolling budget"}</p><p className="mt-1 text-xs text-blue-400">{receipt.simulated ? "SIMULATED" : "Review receipt type"}</p></td>
                     <td className="px-5 py-4 font-mono text-xs">{receipt.account_id}</td>
                     <td className="px-5 py-4">{new Intl.NumberFormat("en-US", { style: "currency", currency: receipt.currency }).format(receipt.amount_minor / 100)} {receipt.currency}</td>
                     <td className="px-5 py-4 text-zinc-400">{identityName(receipt.identity)}</td>
@@ -807,7 +807,7 @@ export default async function DashboardPage() {
 
         {/* FOOTER */}
 
-        <footer className="mt-14 border-t border-white/10 py-6 text-xs text-zinc-700">
+        <footer className="mt-14 border-t border-white/10 py-6 text-xs text-zinc-400">
           AgentGuard · Auth0 identity · MCP authorization · policy · human review · audit records
         </footer>
       </div>
@@ -826,7 +826,7 @@ function MetricCard({
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-zinc-400">
         {label}
       </p>
 
@@ -834,7 +834,7 @@ function MetricCard({
         {value}
       </p>
 
-      <p className="mt-1 text-xs text-zinc-600">
+      <p className="mt-1 text-xs text-zinc-400">
         {description}
       </p>
     </div>

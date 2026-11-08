@@ -76,7 +76,8 @@ export default function EvidencePage() {
       <section className="mt-8 rounded-2xl border border-white/10 p-5">
         <h2 className="text-xl font-semibold">What this evidence covers</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">The owner performed approval. Cancellation and pause/resume used the authenticated administrator interface during verification. No real payments moved. The application trusts its privileged server and database operators, so the audit trail is not a cryptographic guarantee against those operators.</p>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">The full negative-authentication browser matrix, independently signed wrong-issuer/audience and expired tokens, and a fresh hosted Supabase/Auth0 rehearsal remain open.</p>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Separate local MCP tests exercise the real verifier with signed wrong-issuer, wrong-audience and expired tokens. They use fixture discovery and public keys. The full negative-authentication browser matrix and a fresh hosted Supabase/Auth0 rehearsal remain open.</p>
+        <p className="mt-3 text-sm"><a className="text-blue-300 underline" href={source + "/blob/main/HOSTED-REHEARSAL.md"}>Read the hosted rehearsal guide</a></p>
         <Link href="/demo" className="mt-4 inline-flex min-h-11 items-center font-semibold text-blue-300 underline">Return to the walkthrough</Link>
       </section>
     </SiteFrame>
