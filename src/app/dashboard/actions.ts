@@ -1,7 +1,9 @@
 "use server";
 
 import { requireHumanAdmin, requireSensitiveAdmin } from "@/lib/admin-access";
+import { hasFreshSensitiveAuthentication } from "@/lib/admin-policy";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 async function review(formData: FormData, decision: "APPROVED" | "DENIED") {
   const user = await (decision === "APPROVED" ? requireSensitiveAdmin() : requireHumanAdmin());
@@ -36,7 +38,10 @@ export async function denyApproval(formData: FormData) {
 }
 
 async function controlOperation(name: "cancel_approval" | "set_execution_pause", args: Record<string, string | boolean>) {
-  const user = await (name === "set_execution_pause" && args.p_paused === false ? requireSensitiveAdmin() : requireHumanAdmin());
+  const user = await requireHumanAdmin();
+  if (name === "set_execution_pause" && args.p_paused === false && !hasFreshSensitiveAuthentication(user)) {
+    redirect("/dashboard?reauthenticate=resume#execution-controls");
+  }
   if (!user.sub) throw new Error("Verified administrator identity is missing");
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;

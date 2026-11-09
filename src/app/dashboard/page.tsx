@@ -774,7 +774,7 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        <ExecutionControls control={executionControl} approved={approvals.filter((row) => row.status === "APPROVED")} />
+        <ExecutionControls control={executionControl} approved={approvals.filter((row) => row.status === "APPROVED")} recentAuthentication={recentAuthentication} />
         <section className="mt-12" aria-labelledby="receipt-heading">
           <h3 id="receipt-heading" className="text-lg font-semibold">Sandbox refund receipts</h3>
           <p className="mt-2 text-sm text-zinc-400">Persisted ledger entries for simulated refunds. No real money is transferred. Human-reviewed and autonomous refunds are shown separately below.</p>
