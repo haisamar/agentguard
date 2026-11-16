@@ -22,6 +22,11 @@ and PostgreSQL migrations live in the companion repository.
    credential-free evaluation matched expected ledger effects in 10 of 10 fixed
    scenarios. Each report describes its builds and limits.
 
+The [November 9 hosted rehearsal](https://github.com/haisamar/agentguard-mcp/blob/main/HOSTED-VERIFICATION-2026-11-09.md)
+also connected separate Auth0 credentials, protected Vercel previews, and a fresh
+Supabase database. It withheld execution until passkey approval, recorded one
+$758 simulated receipt, and denied replay.
+
 The dashboard shows the stored transaction, expiry, budget, audit events, and
 receipts. Access requires the configured Auth0 subject and verified email.
 Approving or resuming also requires a passkey or MFA event in the last five
@@ -85,3 +90,18 @@ See [dependency verification](DEPENDENCIES.md) for version constraints and
 for the separate Vercel MCP service. The ledger uses simulated USD. The
 application trusts the identity provider, backend credentials, and database
 administrators. The evidence describes the specific tests performed.
+
+## Limitations
+
+- Refunds write to a simulated USD ledger. Payment-provider integration remains
+  future work.
+- Privileged backend and database operators sit inside the trust boundary.
+  Audit records are persisted in PostgreSQL and can be altered by those operators.
+- The public demo uses guided examples. The ten-case local comparison uses one
+  database connection and illustrative baselines. It does not measure model behavior.
+- The hosted access test denied the same verified user before configuring that
+  user as the rehearsal administrator. A separate verified non-admin account
+  was not tested against production.
+- Free hosting can pause or reach usage limits. The public walkthrough remains
+  available independently of the database. Live dashboard availability depends
+  on Auth0 and Supabase.

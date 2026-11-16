@@ -43,8 +43,10 @@ protect against a compromised privileged backend/database administrator.
 Policy and Action tests cover malformed and stale claims. The positive passkey
 flow and its receipt were verified in production. Local HTTP verification also
 rejected direct approval and resume submissions under five disallowed states
-before any write. The complete live negative browser matrix (non-admin,
-unverified, stale and password-only) remains open. See the [evidence index](https://github.com/haisamar/agentguard-mcp/blob/main/SUBMISSION-EVIDENCE.md).
+before any write. Password-only and stale-passkey sessions also failed Resume
+in a real Auth0/localhost browser rehearsal. The separate hosted rehearsal
+denied an account before it was pinned as administrator. A distinct verified
+non-admin account was not tested against production. See the [evidence index](https://github.com/haisamar/agentguard-mcp/blob/main/SUBMISSION-EVIDENCE.md).
 
 References:
 - https://auth0.com/docs/secure/multi-factor-authentication/step-up-authentication
